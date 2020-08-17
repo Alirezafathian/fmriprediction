@@ -1,0 +1,108 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+# DotEnv configuration
+.env
+
+# Database
+*.db
+*.rdb
+
+# Pycharm
+.idea
+
+# VS Code
+.vscode/
+
+# Spyder
+.spyproject/
+
+# Jupyter NB Checkpoints
+.ipynb_checkpoints/
+
+# exclude data from source control by default
+/references/FSlicense/*
+!/references/FSlicense/.gitkeep
+/stuffs/*
+/data/02_fmriprep/*
+!/data/02_fmriprep/.gitkeep
+/data/01_bids/*/*/*/*
+!/data/01_bids/sub-002S4171/*/*/*
+/data/00_dicom/*
+!/data/00_dicom/.gitkeep
+/data/03_time_series/*/*
+!/data/03_time_series/*/sub-002S4219*
+/data/04_correlations/*/*/*
+!/data/04_correlations/*/*/sub-002S4219*
+/data/05_adjacency_matrices/*/*/*/*
+!/data/05_adjacency_matrices/*/*/*/sub-002S4219*
+/data/06_network_measures/*/*/*/*/*
+!/data/06_network_measures/*/*/*/*/sub-002S4219*
+/data/07_features/*
+!/data/07_features/.gitkeep
+# Mac OS-specific storage files
+.DS_Store
+
+# vim
+*.swp
+*.swo
+
+# Mypy cache
+.mypy_cache/
+fmriprediction.sublime-project
+fmriprediction.sublime-workspace

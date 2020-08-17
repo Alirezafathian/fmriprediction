@@ -1,0 +1,2 @@
+	density	average_shortest_path_length	transitivity	average_clustering	center	diameter	radius	periphery	local_efficiency	global_efficiency	pearson_correlation	degree_assortativity_coefficient
+0	0.09694446958043013	6.658100322746057	0.7042753608053636	0.6146558866675446	['89']	18	9	['120', '214', '331']	0.7005236050333985	0.28858000714249665	0.2852916077152026	0.28529160771520196
