@@ -1,4 +1,7 @@
+from config import *
 import pandas as pd
+import numpy as np
+import glob
 
 def mvfunc(measures, sub_list, strlist):
     """
@@ -133,3 +136,13 @@ def sub_rel(measures,groups,strlist,ds):
             sub_corr[strlist[i]][g] = mvfunc(measures[g], subjects[g], strlist)['mean'][strlist[i]].corr()
 
     return {'cov': sub_cov, 'corr': sub_corr}
+
+#########################################################################################
+
+def read_M(sub,ds,corr):
+    """ read the correlation matrix for a subject with a given denoising strategy
+    """
+    
+    filesnp = glob.glob(rootdir + "/data/04_correlations/corr-%s/ds-%s/*%s*.npy"
+                      %(corr,ds,sub))
+    return np.load(filesnp[0])
