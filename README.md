@@ -1,4 +1,7 @@
 fMRIPrediction
 ==============================
 
-from fMRI data to making predictions
+From fMRI data to making predictions
+
+{% include pipeline_with_links.html %}
+
