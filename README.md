@@ -8,28 +8,24 @@ From fMRI data to making predictions
 
 ## Installation 
 1. Clone the repository
-
 ```bash
 git clone https://github.com/Alirezafathian/fmriprediction.git
 cd fmriprediction
 ```
-
 2. Create a create a python3 virtual-env in the main folder (Optional)
-
 3. Install requirements
 ```bash
 pip -m install requirements.txt
 ```
-4. Install <a href="https://www.nitrc.org/projects/dcm2nii">dcm2nii</a> and add it to your PATH environment:
+4. Install <a href="https://www.nitrc.org/projects/dcm2nii">dcm2nii</a> and add it to your PATH environment: 
 For example, if you’re using bash, you should add to your ~/.bashrc:
 ```bash
 export PATH="/path/to/mricrone/directory/:$PATH"
 ```
-
-5. Install <a href="https://fmriprep.org/en/stable/">fMRIPrep</a> using docker
+5. Install <a href="https://fmriprep.org/en/stable/">fMRIPrep</a> using docker 
 
 ## Folder Structure
-After creation, your project should look like this:
+After creation, your project should look like this: 
 
 ```
 .
@@ -78,9 +74,9 @@ After creation, your project should look like this:
     └── viz
 ```
 
-<a href="https://github.com/Alirezafathian/fmriprediction/tree.md">Here</a> you can see the structure tree in detail. The entire analyzing process was done for subject sub-002S4171 from <a href="http://adni.loni.usc.edu/">ADNI database</a>, and all the results are stored in the repo for a better understanding of the project structure.
+<a href="https://github.com/Alirezafathian/fmriprediction/blob/master/docs/folder_structure.md">Here</a> you can see the structure tree in detail. The entire analyzing process was done for subject sub-002S4171 from <a href="http://adni.loni.usc.edu/">ADNI database</a>, and all the results are stored in the repo for a better understanding of the project structure.
 ## Usage
-1. Put the DICOM Images in /fmriprediction/data/00_dicom.
+1. Put the DICOM Images in /fmriprediction/data/00_dicom. 
 For each subject a T1w and a fMRI is needed.
 ```
 .
@@ -92,12 +88,12 @@ For each subject a T1w and a fMRI is needed.
 │   │   │   └── RS-fMRI DICOM files
 │   │   │       └── ...
 ```
-put a .csv file containing subjects info in /fmriprediction/data/subjects_list.csv. this file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
+put a .csv file containing subjects info in /fmriprediction/data/subjects_list.csv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
 
 2. Put Freesurfer License in /fmriprediction/references/FSlicense/. You can get this from <a href="https://surfer.nmr.mgh.harvard.edu/registration.html">here</a>.
 
-3. Setting up the config file
-the config.py file in you project directory should be look like this: 
+3. Setting up the config file 
+The config.py file in you project directory should be look like this: 
 ```python
 subjects_groups      = ['CN','EMCI','LMCI','AD'] # CN:   control,
 					         # EMCI: early mild cognitive impairment,
@@ -115,3 +111,5 @@ subjects_list_dir    = rootdir + '/data/subjects_list.csv'
 dicom_dir            = rootdir + '/data/00_dicom'
 ```
 You should write subjects_groups of your own dataset and also choose other parameters.
+
+5. Now you can go to /fmriprediction/notebooks/ and start analysing your dataset.
