@@ -67,16 +67,16 @@ For each subject a T1w and a fMRI is needed.
 .
 ├── data
 │   ├── 00_dicom
-│   │   ├── sub-002S4746    # the name of folder containing DICOM files sould be in this format: sub-<subject ID>
+│   │   ├── sub-002S4746    # the name of folder containing DICOM files should be in this format: sub-<subject ID>
 │   │   │   ├── T1w DICOM files
 │   │   │   │   └── ...
 │   │   │   └── RS-fMRI DICOM files
 │   │   │       └── ...
 ```
-Put a .csv file containing subjects info in /fmriprediction/data/subjects_list.csv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
+Create a file containing subjects info and save it in in /fmriprediction/data/subjects_list.csv and in /fmriprediction/data/01_bids/participants.tsv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
 	
-2. Put Freesurfer License in /fmriprediction/references/FSlicense/. You can get this from <a href="https://surfer.nmr.mgh.harvard.edu/registration.html">here</a>.
+2. Put Freesurfer License in /fmriprediction/references/FSlicense. You can get this from <a href="https://surfer.nmr.mgh.harvard.edu/registration.html">here</a>.
 
 3. Edit the config file in /fmriprediction/config.py
 
-4. Now you can go to /fmriprediction/notebooks/ and start analyzing your dataset.
+4. Now you can go to /fmriprediction/notebooks and start analyzing your dataset.
