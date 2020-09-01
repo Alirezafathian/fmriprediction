@@ -23,10 +23,7 @@ For example, if you’re using bash, you should add to your ~/.bashrc:
 export PATH="/path/to/mricrone/directory/:$PATH"
 ```
 5. Install <a href="https://fmriprep.org/en/stable/">fMRIPrep</a> using docker 
-
 ## Folder Structure
-After creation, your project should look like this: 
-
 ```
 .
 ├── config.py
@@ -60,18 +57,6 @@ After creation, your project should look like this:
 ├── reports
 ├── requirements.txt
 └── src
-    ├── adjacency_matrix
-    ├── data
-    ├── denoising_timeseries
-    ├── dicom_to_bids
-    ├── features
-    ├── fMRIPrep_preprocessing
-    ├── functional_connectivity
-    ├── group_level_analysis
-    ├── models
-    ├── network_measures
-    ├── single_subject_analysis
-    └── viz
 ```
 
 <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/docs/folder_structure.md">Here</a> you can see the structure tree in detail. The entire analyzing process was done for subject sub-002S4171 from <a href="http://adni.loni.usc.edu/">ADNI database</a>, and all the results are stored in the repo for a better understanding of the project structure.
@@ -88,28 +73,10 @@ For each subject a T1w and a fMRI is needed.
 │   │   │   └── RS-fMRI DICOM files
 │   │   │       └── ...
 ```
-put a .csv file containing subjects info in /fmriprediction/data/subjects_list.csv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
-
+Put a .csv file containing subjects info in /fmriprediction/data/subjects_list.csv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
+	
 2. Put Freesurfer License in /fmriprediction/references/FSlicense/. You can get this from <a href="https://surfer.nmr.mgh.harvard.edu/registration.html">here</a>.
 
-3. Setting up the config file 
-The config.py file in you project directory should be look like this: 
-```python
-subjects_groups      = ['CN','EMCI','LMCI','AD'] # CN:   control,
-					         # EMCI: early mild cognitive impairment,
-						 # LMCI: late mild cognitive impairment,
-						 # AD:   Alzheimer’s disease
-denoising_strategies = ['36p'] # or '36pscrubbed', '9p'
-correlation_types    = ['pearson'] # or 'glasso'
-thresholding_methods = ['gce'] # or 'userdefined'
-thresholding_values  = [0.05] # density of the adjacency matrix with userdefined thresholding method.
-normalize_measures   = True   # normalize local measures by mean
+3. Edit the config file in /fmriprediction/config.py
 
-#directories:
-rootdir              = '/home/alireza/Thesis/fmriprediction' # the directory of fmriprediction
-subjects_list_dir    = rootdir + '/data/subjects_list.csv' 
-dicom_dir            = rootdir + '/data/00_dicom'
-```
-You should write subjects_groups of your own dataset and also choose other parameters.
-
-5. Now you can go to /fmriprediction/notebooks/ and start analysing your dataset.
+4. Now you can go to /fmriprediction/notebooks/ and start analyzing your dataset.
