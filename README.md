@@ -2,7 +2,6 @@ fMRIPrediction
 ==============================
 
 From fMRI data to making predictions
-## Introduction
 
 ![pipeline](./docs/pipeline/pipeline.png)
 
@@ -18,6 +17,7 @@ cd fmriprediction
 pip -m install requirements.txt
 ```
 4. Install <a href="https://www.nitrc.org/projects/dcm2nii">dcm2nii</a> and add it to your PATH environment: 
+
 For example, if you’re using bash, you should add to your ~/.bashrc:
 ```bash
 export PATH="/path/to/mricrone/directory/:$PATH"
