@@ -29,8 +29,8 @@ def mvfunc(measures, sub_list, strlist):
             except KeyError:
                 mean_loc[strlist[i]] = m
                 var_loc[strlist[i]]  = v
-        mean_loc[strlist[i]]  = mean_loc[strlist[i]].drop(['ID'], axis=0)
-        var_loc[strlist[i]]   = var_loc [strlist[i]].drop(['ID'], axis=0)
+        mean_loc[strlist[i]]  = mean_loc[strlist[i]]
+        var_loc[strlist[i]]   = var_loc [strlist[i]]
         mean_loc[strlist[i]].columns = sub_list
         var_loc[strlist[i]].columns  = sub_list
     return {'mean': mean_loc, 'var': var_loc}
@@ -38,7 +38,7 @@ def mvfunc(measures, sub_list, strlist):
 #########################################################################################
 
 def mvfunc_total(measures,groups,strlist,ds):
-    """prints out the mean and variance of local measures
+    """prints out the mean and the variance of local measures
     Inputs:
     measures = includes network measures for all subjects, defined in notebook 08.
     groups = list of subjects groups
@@ -48,7 +48,7 @@ def mvfunc_total(measures,groups,strlist,ds):
     n*m dataframe
         where:
         n = number of local network measures
-        m = 2 * 3 ()
+        m = 2 * number of groups
     """
     global mvfunc
     totalm = {}
@@ -66,7 +66,7 @@ def mvfunc_total(measures,groups,strlist,ds):
             totalm[g][strategy]['nan'] = pd.DataFrame({})
             for sub in d:
                 totalm[g][strategy]['nan'] = pd.concat([totalm[g][strategy]['nan'],d[sub]])
-                    
+
     mv_total= pd.DataFrame({})
     for g in groups:
         mv_total=pd.concat([mv_total,mvfunc(totalm[g],['nan'],strlist)['mean']['loc_'+ds]],axis=1)
@@ -112,9 +112,8 @@ def sub_rel(measures,groups,strlist,ds):
     computes covariance and correlation between subjects.
 
     inputs:
-    all_measures = a variable including network measures for all subjects, defined in notebook 08.
-    cn_measures = a variable including network measures for all CN subjects, defined in notebook 08.
-    ad_measures = a variable including network measures for all AD subjects, defined in notebook 08.
+    measures = a variable including network measures for all subjects, defined in notebook 08.
+    groups = groups of patients
     strlist = denoising_strategies list
 
     outputs
@@ -131,7 +130,6 @@ def sub_rel(measures,groups,strlist,ds):
         sub_cov[strlist[i]] = {}
         sub_corr[strlist[i]] = {}
         for g in groups:
-
             sub_cov [strlist[i]][g] = mvfunc(measures[g], subjects[g], strlist)['mean'][strlist[i]].cov()
             sub_corr[strlist[i]][g] = mvfunc(measures[g], subjects[g], strlist)['mean'][strlist[i]].corr()
 
@@ -140,9 +138,22 @@ def sub_rel(measures,groups,strlist,ds):
 #########################################################################################
 
 def read_M(sub,ds,corr):
-    """ read the correlation matrix for a subject with a given denoising strategy
+    """ read the correlation matrix for a subject with a given denoising strategy and correlation type
     """
-    
+
     filesnp = glob.glob(rootdir + "/data/04_correlations/corr-%s/ds-%s/*%s*.npy"
                       %(corr,ds,sub))
+    return np.load(filesnp[0])
+
+#########################################################################################
+
+def read_adj_M(sub,ds,corr,tm,negative):
+    """ read the adjacency matrix for a subject with a given denoising strategy, correlation type, and thresholding method
+    """
+    if negative:
+    	filesnp = glob.glob(rootdir + "/data/05_adjacency_matrices/negative/*%s*/corr-%s/ds-%s/*%s*.npy"
+    	                  %(tm,corr,ds,sub))
+    else:
+        filesnp = glob.glob(rootdir + "/data/05_adjacency_matrices/positive/*%s*/corr-%s/ds-%s/*%s*.npy"
+                          %(tm,corr,ds,sub))
     return np.load(filesnp[0])

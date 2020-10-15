@@ -103,14 +103,14 @@ def userdefined_adj(sub,correlation):
                 adjM = get_adjmtx(correlation[ds][ct]['M'],td,verbose=True)
                 adjG = nx.from_numpy_matrix(adjM)
                     
-                os.system('mkdir -p %s/data/05_adjacency_matrices/tm-userdefined-%.3f/\
+                os.system('mkdir -p %s/data/05_adjacency_matrices/positive/tm-userdefined-%.3f/\
 corr-%s/ds-%s/'%(rootdir,td,ct,ds))
 
-                nx.write_gexf(adjG,"%s/data/05_adjacency_matrices/tm-userdefined-%.3f/\
+                nx.write_gexf(adjG,"%s/data/05_adjacency_matrices/positive/tm-userdefined-%.3f/\
 corr-%s/ds-%s/sub-%s_ds-%s_corr-%s_tm-userdefined_density-%.3f.gexf"
                               %(rootdir,td,ct,ds,sub,ds,ct,td))
                     
-                np.save("%s/data/05_adjacency_matrices/tm-userdefined-%.3f/corr-%s/\
+                np.save("%s/data/05_adjacency_matrices/positive/tm-userdefined-%.3f/corr-%s/\
 ds-%s/sub-%s_ds-%s_corr-%s_tm-userdefined_density-%.3f"
                          %(rootdir,td,ct,ds,sub,ds,ct,td), adjM)
                 
@@ -132,14 +132,14 @@ def gce_adj(sub,correlation, tol):
                 d.pop('weight', None)
                 adjM = nx.to_numpy_array(adjG)
     
-            os.system('mkdir -p %s/data/05_adjacency_matrices/tm-gce/\
+            os.system('mkdir -p %s/data/05_adjacency_matrices/positive/tm-gce/\
 corr-%s/ds-%s/'%(rootdir,ct,ds))
                     
-            nx.write_gexf(adjG,"%s/data/05_adjacency_matrices/tm-gce/\
+            nx.write_gexf(adjG,"%s/data/05_adjacency_matrices/positive/tm-gce/\
 corr-%s/ds-%s/sub-%s_ds-%s_corr-%s_tm-gce.gexf"
                           %(rootdir,ct,ds,sub,ds,ct))
                     
-            np.save("%s/data/05_adjacency_matrices/tm-gce/corr-%s/\
+            np.save("%s/data/05_adjacency_matrices/positive/tm-gce/corr-%s/\
 ds-%s/sub-%s_ds-%s_corr-%s_tm-gce"
                     %(rootdir,ct,ds,sub,ds,ct), adjM)
 
@@ -147,3 +147,37 @@ ds-%s/sub-%s_ds-%s_corr-%s_tm-gce"
 def all_gce(subs,correlations,tol):
     for sub in subs:
         gce_adj(sub,correlations[sub],tol)
+
+
+
+def Ngce_adj(sub,correlation, tol):
+    """
+    """
+    
+    thresholds = np.arange(0,1,.1)
+    for ds in denoising_strategies:
+        for ct in correlation_types:
+            print('sub-%s, ds-%s, corr-%s: '%(sub,ds,ct))
+            M = correlation[ds][ct]['M'].copy()
+            M = -M
+            Gr = nx.from_numpy_array(M)
+            adjG = fGCE(Gr, thresholds,tol)
+            for n1, n2, d in adjG.edges(data=True):
+                d.pop('weight', None)
+                adjM = nx.to_numpy_array(adjG)
+    
+            os.system('mkdir -p %s/data/05_adjacency_matrices/negative/tm-gce/\
+corr-%s/ds-%s/'%(rootdir,ct,ds))
+                    
+            nx.write_gexf(adjG,"%s/data/05_adjacency_matrices/negative/tm-gce/\
+corr-%s/ds-%s/sub-%s_ds-%s_corr-%s_tm-gce.gexf"
+                          %(rootdir,ct,ds,sub,ds,ct))
+                    
+            np.save("%s/data/05_adjacency_matrices/negative/tm-gce/corr-%s/\
+ds-%s/sub-%s_ds-%s_corr-%s_tm-gce"
+                    %(rootdir,ct,ds,sub,ds,ct), adjM)
+
+            
+def all_Ngce(subs,correlations,tol):
+    for sub in subs:
+        Ngce_adj(sub,correlations[sub],tol)

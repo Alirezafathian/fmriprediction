@@ -11,11 +11,11 @@ def normalize(df):
     '''
     normalize dataframe columns by mean
     '''
-    min_max_scaler      = preprocessing.MinMaxScaler()
-    x                   = df.values #returns a numpy array
-    x_scaled            = min_max_scaler.fit_transform(x)
-    normalized          = pd.DataFrame(x_scaled)
-    normalized.columns  = df.columns
+    min_max_scaler     = preprocessing.MinMaxScaler()
+    x                  = df.values #returns a numpy array
+    x_scaled           = min_max_scaler.fit_transform(x)
+    normalized         = pd.DataFrame(x_scaled)
+    normalized.columns = df.columns
     return normalized
 
 def loc_mes_disconnected(G,M):
@@ -62,7 +62,7 @@ def glob_mes_disconnected(G):
     """
     computes and saves global measures for a disconnected graph G
     """
-    
+
     m = {}
     # transitivity: the fraction of all possible triangles present in G.
     m['transitivity'] = [nx.transitivity(G)]
@@ -75,11 +75,11 @@ def glob_mes_disconnected(G):
     return pd.DataFrame.from_dict(m)
 
 
-def loc_mes_connected(G):
+def loc_mes_connected(G,ct):
     """
     computes and saves local measures for a connected graph G
     """
-    
+
     #ordered list of degrees
     lss=[]
     for i in list(G.degree(nx.nodes(G))):
@@ -107,8 +107,9 @@ def loc_mes_connected(G):
     np.fromiter(nx.load_centrality(G).values(), dtype=float)
     m['clustering_coef'] = \
     np.fromiter(nx.clustering(G).values(), dtype=float)
-    m['pagerank'] = \
-    np.fromiter(nx.pagerank(G).values(), dtype=float)
+    if ct!='glasso':
+        m['pagerank'] =  \
+        np.fromiter(nx.pagerank(G,max_iter=500).values(), dtype=float)
     m['subgraph'] = \
     np.fromiter(nx.subgraph_centrality(G).values(), dtype=float)
     m['harmonic'] = \
@@ -121,7 +122,7 @@ def glob_mes_connected(G):
     """
     computes and saves global measures for a connected graph G
     """
-    
+
     m = {}
     m['density'] = nx.density(G)
     m['average_shortest_path_length'] = nx.average_shortest_path_length(G)
@@ -147,7 +148,8 @@ def compute_measures(subjects,
                     denoising_strategies,
                     correlation_types,
                     thresholding_methods,
-                    thresholding_values):
+                    thresholding_values,
+		    negative_corr = False):
     global rootdir
     for sub in subjects:
         for ds in denoising_strategies:
@@ -161,12 +163,16 @@ def compute_measures(subjects,
                                              %(ct,ds,sub))
                         corrMdir = glob.glob(rootdir + "/data/04_correlations/corr-%s/ds-%s/*%s*.npy"
                                              %(ct,ds,sub))
-                        adjGdir  = glob.glob(rootdir + "/data/05_adjacency_matrices/tm-*%s*/corr-%s/ds-%s/*%s*.gexf"%(tm,ct,ds,sub))
-                        adjMdir  = glob.glob(rootdir + "/data/05_adjacency_matrices/tm-*%s*/corr-%s/ds-%s/*%s*.npy"%(tm,ct,ds,sub))
-                        corrG    = nx.read_gexf(corrGdir[0])
-                        corrM    = np.load(corrMdir[0])
-                        adjG     = nx.read_gexf(adjGdir[0])
-                        adjM     = np.load(adjMdir[0])
+                        if not negative_corr:
+                            adjGdir = glob.glob(rootdir + "/data/05_adjacency_matrices/positive/tm-*%s*/corr-%s/ds-%s/*%s*.gexf"%(tm,ct,ds,sub))
+                            adjMdir = glob.glob(rootdir + "/data/05_adjacency_matrices/positive/tm-*%s*/corr-%s/ds-%s/*%s*.npy"%(tm,ct,ds,sub))
+                        else:
+                            adjGdir = glob.glob(rootdir + "/data/05_adjacency_matrices/negative/tm-*%s*/corr-%s/ds-%s/*%s*.gexf"%(tm,ct,ds,sub))
+                            adjMdir = glob.glob(rootdir + "/data/05_adjacency_matrices/negative/tm-*%s*/corr-%s/ds-%s/*%s*.npy"%(tm,ct,ds,sub))
+                        corrG = nx.read_gexf(corrGdir[0])
+                        corrM = np.load(corrMdir[0])
+                        adjG  = nx.read_gexf(adjGdir[0])
+                        adjM  = np.load(adjMdir[0])
 
                         # compute the giant component
                         adjG_gc = [adjG.subgraph(c).copy() for c in nx.connected_components(adjG)]
@@ -185,7 +191,9 @@ def compute_measures(subjects,
                         gc_loc_mes_adj_norm.ID = gc_loc_mes_adj.ID
 
                         # save measures
-                        dirc = rootdir + '/data/06_network_measures/tm-%s/corr-%s/ds-%s/sub-%s'%(tm,ct,ds,sub)
+                        dirc = rootdir + '/data/06_network_measures/positive/tm-%s/corr-%s/ds-%s/sub-%s'%(tm,ct,ds,sub)
+                        if negative_corr:
+                            dirc = rootdir + '/data/06_network_measures/negative/tm-%s/corr-%s/ds-%s/sub-%s'%(tm,ct,ds,sub)
                         os.system('mkdir -p %s'%dirc)
                         loc_mes_adj.to_csv \
                         ('%s/sub-%s_ds-%s_corr-%s_tm-%s_local_measures.csv'
@@ -218,7 +226,8 @@ def add_measure(gl,c,bw,
                 mes,mes_name,
                 subjects,
                 denoising_strategies,
-                smethods):
+                smethods,
+		negative_corr = False):
     '''
     adding new measures to the existing measure files for all subjects
 
@@ -234,7 +243,6 @@ def add_measure(gl,c,bw,
     denoising_strategies = list of denoising strategies that you want to include.
     thresholding_methods = list of thresholding methods that you want to include.
     '''
-
     global rootdir
     for sub in subjects:
         for ds in denoising_strategies:
@@ -246,7 +254,10 @@ def add_measure(gl,c,bw,
                         print(sub,ds,tm,ct)
                         corrGdir = glob.glob(rootdir + "/data/04_correlations/corr-%s/ds-%s/*%s*.gexf"
                                              %(ct,ds,sub))
-                        adjGdir  = glob.glob(rootdir + "/data/05_adjacency_matrices/tm-*%s*/corr-%s/ds-%s/*%s*.gexf"%(tm,ct,ds,sub))
+                        if not negative_corr:
+                            adjGdir  = glob.glob(rootdir + "/data/05_adjacency_matrices/positive/tm-*%s*/corr-%s/ds-%s/*%s*.gexf"%(tm,ct,ds,sub))
+                        if negative_corr:
+                            adjGdir  = glob.glob(rootdir + "/data/05_adjacency_matrices/negative/tm-*%s*/corr-%s/ds-%s/*%s*.gexf"%(tm,ct,ds,sub))
                         corrG    = nx.read_gexf(corrGdir[0])
                         adjG     = nx.read_gexf(adjGdir[0])
 
@@ -257,8 +268,10 @@ def add_measure(gl,c,bw,
                         corrG_gc      = corrG.copy()
                         not_connected = set(corrG.nodes) - set(adjG_gc.nodes)
                         corrG_gc.remove_nodes_from(not_connected)
-                        
-                        dirc = '%s/data/06_network_measures/tm-%s/corr-%s/ds-%s/sub-%s'%(rootdir,tm,ct,ds,sub)
+
+                        dirc = '%s/data/06_network_measures/positive/tm-%s/corr-%s/ds-%s/sub-%s'%(rootdir,tm,ct,ds,sub)
+                        if negative_corr:
+                            dirc = rootdir + '/dataframe/06_network_measures/negative/tm-%s/corr-%s/ds-%s/sub-%s'%(tm,ct,ds,sub)
                         if gl=='local':
                             if c=='disconnected':
                                 gc_local_dir   = glob.glob("%s/*local_measures_giant_component.csv"
@@ -375,3 +388,52 @@ def add_measure(gl,c,bw,
                                 gc_glob_mes_adj.to_csv \
                                 ('%s/sub-%s_ds-%s_corr-%s_tm-%s_global_measures_giant_component.csv'
                                  %(dirc,sub,ds,ct,tm), sep='\t')
+
+def compute_measures_ws(
+    subjects,
+    denoising_strategies,
+    correlation_types,sign='both'):
+    for sub in subjects:
+        for ds in denoising_strategies:
+            for ct in correlation_types:
+                        if sign=='both':
+                            corrGdir = glob.glob(rootdir + "/data/04_correlations/corr-%s/all/ds-%s/*%s*.gexf"
+                                                 %(ct,ds,sub))
+                        if sign=='positive':
+                            corrGdir = glob.glob(rootdir + "/data/04_correlations/corr-%s/separated/ds-%s/*%s*%s*.gexf"
+                                                 %(ct,ds,sub,sign))
+                        if sign=='negative':
+                            corrGdir = glob.glob(rootdir + "/data/04_correlations/corr-%s/separated/ds-%s/*%s*%s*.gexf"
+                                                 %(ct,ds,sub,sign))
+                        corrG = nx.read_gexf(corrGdir[0])
+                        Gcc = sorted(nx.connected_components(corrG), key=len, reverse=True)
+                        G = corrG.subgraph(Gcc[0])
+
+                        # compute measures
+                        gc_loc_mes_adj  = loc_mes_connected(G,ct)
+                        gc_glob_mes_adj = glob_mes_connected(G)
+
+                        # compute normalized local measures
+                        gc_loc_mes_adj_norm    = normalize(gc_loc_mes_adj)
+                        gc_loc_mes_adj_norm.ID = gc_loc_mes_adj.ID
+
+                        # save measures
+                        if sign=='both':
+                            dirc = rootdir + '/data/06_network_measures/all/tm-/corr-%s/ds-%s/sub-%s'%(ct,ds,sub)
+                        else:
+                            dirc = rootdir + '/data/06_network_measures/separated/tm-/corr-%s/ds-%s/sub-%s'%(ct,ds,sub)
+                        os.system('mkdir -p %s'%dirc)
+
+                        gc_loc_mes_adj.to_csv \
+                        ('%s/sub-%s_ds-%s_corr-%s_tm-_local_measures_giant_component.csv'
+                         %(dirc,sub,ds,ct), sep='\t')
+
+                        gc_glob_mes_adj.to_csv \
+                        ('%s/sub-%s_ds-%s_corr-%s_tm-_global_measures_giant_component.csv'
+                         %(dirc,sub,ds,ct), sep='\t')
+
+                        gc_loc_mes_adj_norm.to_csv \
+                        ('%s/sub-%s_ds-%s_corr-%s_tm-_local_measures_giant_component_norm.csv'
+                         %(dirc,sub,ds,ct), sep='\t')
+
+                        print('✓ subject: %s, Denoising Strategy: %s, Correlation Type: %s'%(sub,ds,ct))

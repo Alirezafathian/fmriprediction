@@ -2,15 +2,27 @@ from config import *
 from src.data import subjects
 import numpy as np
 import nibabel as nb
+import pandas as pd
 import glob,os
 import random
 import scipy.stats
 from nilearn import surface,datasets,plotting
+import matplotlib.pyplot as plt
+
+coord = pd.read_csv('%s/references/HCP-MMP1/MMP_yeo2011_networks.csv'%rootdir)
+coordinates = coord.T.loc[['X','Y','Z']].T.to_numpy()
+
+colors=[(255/255, 0/255, 0/255), (249/255, 6/255, 6/255), (242/255, 13/255, 13/255), (236/255, 19/255, 19/255),
+    (230/255, 25/255, 25/255), (223/255, 32/255, 32/255), (217/255, 38/255, 38/255), (210/255, 45/255, 45/255),
+    (204/255, 51/255, 51/255), (198/255, 57/255, 57/255), (191/255, 64/255, 64/255), (185/255, 70/255, 70/255),
+    (179/255, 77/255, 77/255), (172/255, 83/255, 83/255), (166/255, 89/255, 89/255), (159/255, 96/255, 96/255),
+    (153/255, 102/255, 102/255), (147/255, 108/255, 108/255), (140/255, 115/255, 115/255),
+    (134/255, 121/255, 121/255), (128/255, 128/255, 128/255)]
+colors=colors[-1:0:-1]
 
 def get_adjmtx(corrmtx,density,verbose=False):
     """
     """
-
     assert density<=1
     cutoff=scipy.stats.scoreatpercentile(corrmtx[np.triu_indices_from(corrmtx,1)],
                                          100-(100*density))
@@ -26,44 +38,19 @@ def get_adjmtx(corrmtx,density,verbose=False):
     adjmtx[np.diag_indices_from(adjmtx)]=0
     return(adjmtx)
 
-
-
-
 def brain_viz(groups, denoising_strategy,
               correlation_type,subs,density,
               method):
     """
     """
-
+    global colors, coordinates
     from src.data import subjects
     all_subs = {}
     all_subs['all'] = subjects.subjects['all'].copy()
     for g in subjects_groups:
         all_subs[g] = all_subs['all'][all_subs['all'].group==g].participant_id.to_list()
 
-    atlasdir=rootdir + '/references/HCP-MMP1'
-    atlas={'left':'lh.HCP-MMP1.fsaverage5.gii','right':'rh.HCP-MMP1.fsaverage5.gii'}
-    fsaverage = datasets.fetch_surf_fsaverage()
-
-    atlaslabels = []
-    coordinates = []
-
-    for hemi in ['left', 'right']:
-        atlaslabeltable=nb.load(os.path.join(atlasdir,atlas[hemi])).labeltable.labels
-        atlaslabels.extend([i.label for i in atlaslabeltable[1:]])
-
-        vert =nb.load(os.path.join(atlasdir,atlas[hemi])).darrays[0].data
-        rr, _ = surface.load_surf_mesh(fsaverage['pial_%s' % hemi])
-        for k, label in enumerate(atlaslabels):
-            if "Unknown" not in str(label):  # Omit the Unknown label.
-                # Compute mean location of vertices in label of index k
-                coordinates.append(np.mean(rr[vert == k], axis=0))
-
-    coordinates = np.array(coordinates)  # 3D coordinates of parcels
-    coordinates = coordinates[~np.isnan(coordinates).any(axis=1)]
-    # droping the first roi
-    coordinates = coordinates[1:]
-    dirc          = rootdir + "/data/04_correlations/corr-%s/ds-%s"%(correlation_type,denoising_strategy)
+    dirc           = rootdir + "/data/04_correlations/corr-%s/ds-%s"%(correlation_type,denoising_strategy)
     final_subjects = {}
     if type(subs) == int:
         subL={}
@@ -79,19 +66,26 @@ def brain_viz(groups, denoising_strategy,
         groups = (all_subs['all'][all_subs['all'].participant_id.isin(subs)].group).to_list()
         for g in groups:
             final_subjects[g]   = list(set(subs) & set(all_subs[g]))
+
     if method == '3d':
         for g in groups:
             for sub in final_subjects[g]:
                 filesnp = glob.glob("%s/*%s*.npy"%(dirc,sub))
                 corrM = np.load(filesnp[0])
+
+                node_size = corrM.sum(axis=1)
+                node_size-=np.mean(node_size)
+                if np.std(node_size)!=0:
+                    node_size/=np.std(node_size)
+                node_size*=5.0
+                node_size+=10
                 view = plotting.view_connectome(get_adjmtx(corrM,density),
-                                                coordinates,node_size=6,
+                                                coordinates,node_size=node_size,
                                                 edge_threshold=.9, colorbar=False,
                                                 title_fontsize=15,linewidth=4,
                                                 title=
                                                 'Top %.3f%% Edges, %s Subject: %s, DS: %s, CT: %s'
                                                 %(100*density,g,sub,denoising_strategy,correlation_type))
-                # uncomment this to open the plot in a web browser:
                 view.open_in_browser()
                 view
     if method == '2d':
@@ -102,76 +96,128 @@ def brain_viz(groups, denoising_strategy,
 
                 filesnp = glob.glob("%s/*%s*.npy"%(dirc,sub))
                 corrM = np.load(filesnp[0])
-                view = plotting.plot_connectome(get_adjmtx(corrM,density),
-                                                coordinates,edge_threshold=.9, node_size=30
-                                                )
-                                                #output_file =
-                                                #'HCP-MMP_atlas_sub-%s_%s.pdf'
-                                                #%(sub,denoising_strategy),
-                                                #)
 
-                # uncomment this to open the plot in a web browser:
+                node_size = corrM.sum(axis=1)
+                node_size-=np.mean(node_size)
+                if np.std(node_size)!=0:
+                    node_size/=np.std(node_size)
+                node_size*=15.0
+                node_size+=36
+
+                M = get_adjmtx(corrM,density)
+                b=np.linspace(0,19,int(np.max(M.sum(axis=1)))+1,dtype=int)
+                scolors = [colors[i] for i in b]
+                sortedcolor = []
+                for d in M.sum(axis=1):
+                    sortedcolor.append(scolors[d])
+                plt.figure(figsize=(len(b),1))
+                for i in range(len(scolors)):
+                    plt.plot([10 * i], [0],markersize=60,c = scolors[i], marker='s')
+                    plt.text(10 * i, 0, i, horizontalalignment='center',
+                         verticalalignment='center',color='white',fontsize=20)
+                plt.axis('off')
+                plt.show()
+
+                view = plotting.plot_connectome(get_adjmtx(corrM,density),coordinates,edge_threshold=.9,
+                    node_size=node_size,axes = (0, 0, 3, 3),edge_cmap='tab10',node_color = sortedcolor)
                 view
     return
 
 
-def brain_viz_from_path(path,title,density,method,outpath = ""):
+def brain_viz_from_path(title,density,method,outpath = "",path='',cm=[]):
     """
     """
 
-    atlasdir=rootdir + '/references/HCP-MMP1'
-    atlas={'left':'lh.HCP-MMP1.fsaverage5.gii','right':'rh.HCP-MMP1.fsaverage5.gii'}
-    fsaverage = datasets.fetch_surf_fsaverage()
+    global coordinates
 
-    atlaslabels = []
-    coordinates = []
+    if path !='':
+        corrM = np.load(path)
+    else:
+        corrM = cm.copy()
 
-    for hemi in ['left', 'right']:
-        atlaslabeltable=nb.load(os.path.join(atlasdir,atlas[hemi])).labeltable.labels
-        atlaslabels.extend([i.label for i in atlaslabeltable[1:]])
+    node_size = corrM.sum(axis=1)
+    node_size-=np.mean(node_size)
+    if np.std(node_size)!=0:
+        node_size/=np.std(node_size)
 
-        vert =nb.load(os.path.join(atlasdir,atlas[hemi])).darrays[0].data
-        rr, _ = surface.load_surf_mesh(fsaverage['pial_%s' % hemi])
-        for k, label in enumerate(atlaslabels):
-            if "Unknown" not in str(label):  # Omit the Unknown label.
-                # Compute mean location of vertices in label of index k
-                coordinates.append(np.mean(rr[vert == k], axis=0))
+    M = get_adjmtx(corrM,density)
 
-    coordinates = np.array(coordinates)  # 3D coordinates of parcels
-    coordinates = coordinates[~np.isnan(coordinates).any(axis=1)]
-    # droping the first roi
-    coordinates = coordinates[1:]
-    corrM = np.load(path)
     if method == '3d':
+        node_size*=5.0
+        node_size+=10
         if outpath!= "":
-            view = plotting.view_connectome(get_adjmtx(corrM,density),
-                                            coordinates,node_size=6,
+            view = plotting.view_connectome(M,
+                                            coordinates,node_size=node_size,
                                             edge_threshold=.9, colorbar=False,
                                             title_fontsize=15,linewidth=4,
                                             title= title)
             # uncomment this to open the plot in a web browser:
-            view.open_in_browser()
+            view.save_as_html(outpath)
             view
         else:
-            view = plotting.view_connectome(get_adjmtx(corrM,density),
-                                            coordinates,node_size=6,
+            view = plotting.view_connectome(M,
+                                            coordinates,node_size=node_size,
                                             edge_threshold=.9, colorbar=False,
                                             title_fontsize=15,linewidth=4,
                                             title= title)
-            view.save_as_html()
+            view.open_in_browser()
             view
     if method == '2d':
+
+        b=np.linspace(0,19,int(np.max(M.sum(axis=1)))+1,dtype=int)
+        scolors = [colors[i] for i in b]
+        sortedcolor = []
+        for d in M.sum(axis=1):
+            sortedcolor.append(scolors[d])
+        node_size*=15.0
+        node_size+=36
         if outpath!= "":
             print(title)
-            view = plotting.plot_connectome(get_adjmtx(corrM,density),
-                                            coordinates,edge_threshold=.9, node_size=30,
+            view = plotting.plot_connectome(M,
+                                            coordinates,edge_threshold=.9, node_size=node_size,
+                                            axes = (0, 0, 3, 3),edge_cmap='tab10',node_color = sortedcolor,
                                             output_file = outpath)
             view
-
         else:
-            print(title)
-            view = plotting.plot_connectome(get_adjmtx(corrM,density),
-                                            coordinates,edge_threshold=.9, node_size=30)
-            view
 
+            plt.figure(figsize=(len(b),1))
+            for i in range(len(scolors)):
+                plt.plot([10 * i], [0],markersize=60,c = scolors[i], marker='s')
+                plt.text(10 * i, 0, i, horizontalalignment='center',
+                        verticalalignment='center',color='white',fontsize=20)
+            plt.axis('off')
+            plt.show()
+
+            print(title)
+            view = plotting.plot_connectome(M,
+                                            coordinates,edge_threshold=.9, node_size=node_size,
+                                            axes = (0, 0, 3, 3),edge_cmap='tab10',node_color = sortedcolor)
+            view
+    return
+
+
+def brain_viz_nodes(nodes,title,method,node_size):
+    """
+    """
+    global coordinates
+    NEWcoordinates = coordinates[nodes,:]
+    node_size = np.array(node_size).astype('float32')
+    node_size-=np.mean(node_size)
+    if np.std(node_size)!=0:
+        node_size/=np.std(node_size)
+
+    if method == '2d':
+        print(title)
+        node_size*=15.0
+        node_size+=36
+        view=plotting.plot_connectome(np.zeros((len(nodes),len(nodes))),
+            NEWcoordinates,edge_threshold=0, node_size=node_size,
+            node_color = 'red',axes = (0, 0, 3, 3))
+        view
+    elif method == '3d':
+        node_size*=5.0
+        node_size+=10
+        view=plotting.view_markers(NEWcoordinates,title = title ,marker_size=node_size)
+        view.open_in_browser()
+        view
     return

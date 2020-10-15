@@ -7,10 +7,10 @@ import pandas as pd
 def dicom_to_bids(to_convert_to_BIDs):
     
     global dicom_dir
-    participants_file = open("%s/data/01_bids/participants.tsv"%(workdir),"a+")
+    participants_file = open("%s/data/01_bids/participants.tsv"%(rootdir),"a+")
     for sub in subjects.to_convert_to_BIDs:
-        if os.path.isdir('%s/data/01_bids/sub-%s/ses-1/anat'%(workdir,sub)) and\
-    len(os.listdir('%s/data/01_bids/sub-%s/ses-1/anat'%(workdir,sub))) != 0:
+        if os.path.isdir('%s/data/01_bids/sub-%s/ses-1/anat'%(rootdir,sub)) and\
+    len(os.listdir('%s/data/01_bids/sub-%s/ses-1/anat'%(rootdir,sub))) != 0:
             print('sub-%s: already covnverted'%sub)
             continue
         dirc = dicom_dir + '/sub-'+sub
@@ -31,7 +31,7 @@ def dicom_to_bids(to_convert_to_BIDs):
         fmri_nii    = glob.glob("%s/*gz"%(dirc))
         fmri_json   = list(set(fmri_json) - {mprage_json})[0]
         fmri_nii    = list(set(fmri_nii)  - {mprage_nii})[0]
-        d           = workdir + '/data/01_bids/sub-' + sub
+        d           = rootdir + '/data/01_bids/sub-' + sub
         print('sub-%s: converted'%sub)
         participants_file.write("sub-%s\r\n" %(sub))
         os.system('mkdir -p %s/ses-1/anat;mkdir %s/ses-1/func'%(d,d))
@@ -41,6 +41,6 @@ def dicom_to_bids(to_convert_to_BIDs):
         os.system('cp \'%s\' %s/ses-1/anat/sub-%s_ses-1_T1w.json'%(mprage_json,d,sub))
     participants_file.close()
     
-    p = pd.read_csv("%s/data/01_bids/participants.tsv"%(workdir), sep='\t')
+    p = pd.read_csv("%s/data/01_bids/participants.tsv"%(rootdir), sep='\t')
     p=p.drop_duplicates()
-    p.to_csv("%s/data/01_bids/participants.tsv"%(workdir),index=False, sep='\t')
+    p.to_csv("%s/data/01_bids/participants.tsv"%(rootdir),index=False, sep='\t')

@@ -16,13 +16,13 @@ cd fmriprediction
 ```bash
 pip -m install requirements.txt
 ```
-4. Install <a href="https://www.nitrc.org/projects/dcm2nii">dcm2nii</a> and add it to your PATH environment: 
+4. Install <a href="https://www.nitrc.org/projects/dcm2nii" target="_blank">dcm2nii</a> and add it to your PATH environment: 
 
 For example, if you’re using bash, you should add to your ~/.bashrc:
 ```bash
 export PATH="/path/to/mricrone/directory/:$PATH"
 ```
-5. Install <a href="https://fmriprep.org/en/stable/">fMRIPrep</a> using docker 
+5. Install <a href="https://fmriprep.org/en/stable/" target="_blank">fMRIPrep</a> using docker 
 ## Folder Structure
 ```
 .
@@ -59,7 +59,7 @@ export PATH="/path/to/mricrone/directory/:$PATH"
 └── src
 ```
 
-<a href="https://github.com/Alirezafathian/fmriprediction/blob/master/docs/folder_structure.md">Here</a> you can see the structure tree in detail. The entire analyzing process was done for subject sub-002S4171 from <a href="http://adni.loni.usc.edu/">ADNI database</a>, and all the results are stored in the repo for a better understanding of the project structure.
+<a href="https://github.com/Alirezafathian/fmriprediction/blob/master/docs/folder_structure.md" target="_blank">Here</a> you can see the structure tree in detail. The entire analyzing process was done for subject sub-002S4171 from <a href="http://adni.loni.usc.edu/" target="_blank">ADNI database</a>, and all the results are stored in the repo for a better understanding of the project structure.
 ## Usage
 1. Put the DICOM Images in /fmriprediction/data/00_dicom. 
 For each subject a T1w and a fMRI is needed.
@@ -73,9 +73,9 @@ For each subject a T1w and a fMRI is needed.
 │   │   │   └── RS-fMRI DICOM files
 │   │   │       └── ...
 ```
-Create a file containing subjects info and save it in in /fmriprediction/data/subjects_list.csv and in /fmriprediction/data/01_bids/participants.tsv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv">this</a>.
+Create a file containing subjects info and save it in in /fmriprediction/data/subjects_list.csv and in /fmriprediction/data/01_bids/participants.tsv. This file should be look like <a href="https://github.com/Alirezafathian/fmriprediction/blob/master/data/subjects_list.csv" target="_blank">this</a>.
 	
-2. Put Freesurfer License in /fmriprediction/references/FSlicense. You can get this from <a href="https://surfer.nmr.mgh.harvard.edu/registration.html">here</a>.
+2. Put Freesurfer License in /fmriprediction/references/FSlicense. You can get this from <a href="https://surfer.nmr.mgh.harvard.edu/registration.html" target="_blank">here</a>.
 
 3. Edit the config file in /fmriprediction/config.py
 

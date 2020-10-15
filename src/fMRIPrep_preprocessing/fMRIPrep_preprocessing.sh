@@ -15,6 +15,6 @@ sudo docker run -ti --rm \
 	-v $FSlicense:/opt/freesurfer/license.txt:ro \
 	poldracklab/fmriprep /bids_dataset /outputs \
 	participant --participant_label $subid \
-	--low-mem --notrack --use-aroma \
-	--output-spaces {T1w,MNI152NLin2009cAsym,fsaverage5} \
+	--notrack \
+	--output-spaces {MNI152NLin2009cAsym,fsaverage5} \
 	--ignore {fieldmaps,slicetiming} 
