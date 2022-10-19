@@ -80,3 +80,5 @@ Create a file containing subjects info and save it in in /fmriprediction/data/su
 3. Edit the config file in /fmriprediction/config.py
 
 4. Now you can go to /fmriprediction/notebooks and start analyzing your dataset.
+## Citation
+Fathian, A., Jamali, Y., & Raoufy, M. R. (2022). <a href="https://www.nature.com/articles/s41598-022-18987-y" target="_blank">The trend of disruption in the functional brain network topology of Alzheimer’s disease.</a> Scientific reports, 12(1), 1-17.
